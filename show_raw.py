@@ -43,17 +43,19 @@ data = np.delete(data, np.s_[4::5], 1)
 db_rgb = np.zeros((data.shape[0]-1, data.shape[1]-1, 3), dtype=float)
 
 # color channel weights
-rw = 1.0
-gw = 0.7
-bw = 0.9
+rw = 0.83
+gw = 1.0
+bw = 1.15
 
 # color conversion matrix (from raspi_dng/dcraw)
 # R        g        b
 cvm = np.array(
-[[ 1.2782,-0.4059, -0.0379], 
-[-0.0478, 0.9066,  0.1413], 
-[ 0.1340, 0.1513,  0.5176 ]])
+[[ 1.20 , -0.30 ,  0.00], 
+[ -0.05 ,  0.80 ,  0.14], 
+[  0.20 ,  0.20 ,  0.7 ]])
 
+#cvm= np.array([8032,-3478,-274,-1222,5560,-240,100,-2714,6716], float).reshape(3,3)/10000.0
+print cvm
 # reorder bayer values (RGGB) into intermediate full-color points (o)
 # green is weighted down a bit to give a more neutral color balance	
 # 
@@ -86,9 +88,10 @@ db_rgb[1::2, 1::2, 2] = bw * data[2::2, 1::2][:, :-1]      # Blue
 db_rgb = db_rgb.dot(cvm)
 
 print ("Min/max values:", np.min(db_rgb),np.max(db_rgb))
+db_rgb = (db_rgb-np.min(db_rgb))/(np.max(db_rgb)-np.min(db_rgb))
 
 # appy log to brighten dark tones (the added value reduces effect by flattening the curve)
-db_rgb = np.log(db_rgb+80)
+db_rgb = np.log(db_rgb+0.1)
 
 #normalize image
 db_rgb = (db_rgb-np.min(db_rgb))/(np.max(db_rgb)-np.min(db_rgb))
